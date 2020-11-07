@@ -1,0 +1,13 @@
+name = "LEFEM"
+uuid = "bbb4a789-0fc6-4acc-8eae-7f825c1dd415"
+authors = ["Hetao Z."]
+version = "0.1.0"
+
+[compat]
+julia = "1.5"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]

@@ -22,7 +22,7 @@ ptype: bar, beam, pstrain, pstress, sym, 3d
 """
 function read_mesh(elemtype, ptype, f::String)
     dim = ELEM_DIM[elemtype]
-    py_nodeTags, py_nodeCoords = getnodes(f)
+    py_nodeTags, py_nodeCoords = get_nodes(f)
     nnp = length(py_nodeTags)
     # correct the numeration to Julia-style
     nodeTags_order = sortperm(py_nodeTags)
@@ -34,7 +34,7 @@ function read_mesh(elemtype, ptype, f::String)
     reordered_nodeTags = py_nodeTags[nodeTags_order] 
     nodeTags = [k for k = 1:nnp]
     # elements
-    py_elemTags, py_elemNodeTags = getelems(f, ET_NUMBER[elemtype])
+    py_elemTags, py_elemNodeTags = get_elems(f, ET_NUMBER[elemtype])
     nel = length(py_elemTags)
     for i in eachindex(py_elemNodeTags)
         py_elemNodeTags[i] = nodeTags_map[py_elemNodeTags[i]]

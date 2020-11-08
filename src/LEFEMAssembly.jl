@@ -24,6 +24,10 @@ mutable struct LESystem
     f::Vector{Float64} # force
 end
 
+# mutable struct InterfaceMesh
+#     edge::Array{IB}
+# end
+
 # ----------------------------
 # Unsupport mixed element types.
 # ----------------------------
@@ -32,6 +36,7 @@ mutable struct LEStructure
     dim::Int
     ndof::Int
     elements::Vector{T} where T <: AbstractElem 
+    # mesh::InterfaceMesh
     system::LESystem
     para::Dict
     ext_f::Vector{Float64}
@@ -93,6 +98,9 @@ function assemble_system(ndof, elements, para, cons_dof_list, cons_d_list, dim)
     return LESystem(K, M, C, f)
 end
 
+"""
+Sometimes it returns `ERROR: gmshModelGetBoundary returned non-zero error code: 1`. But there should be no error. Just call it again.
+"""
 function read_model(elemtype, ptype, meshfile, parafile)
     para = read_para(parafile)
     nnp, dim, elements = read_mesh(elemtype, ptype, meshfile)
@@ -214,5 +222,40 @@ function fetch_data(s::LEStructure, field)
     # reshape(assemble_elem_field(s,field), (s.dim, s.nnp))
 end
 export fetch_data
+
+# --------------------
+# assemble the `edge`
+# --------------------
+
+function relink(edge)
+    n = length(edge)
+    for i = 1:n
+        edge[i] = reordernodes(edge[i])
+    end
+    e = deepcopy(edge)
+    for i = 2:n
+        e[i] = findnextlink(edge, e[i-1])
+    end
+    return e
+end
+
+function reordernodes(b)
+    # 规定法向量在左侧
+    if crossproduct(b.nodes[2].x-b.nodes[1].x, b.n)[1] < 0 
+        tmp = deepcopy(b.nodes[1])
+        b.nodes[1] = deepcopy(b.nodes[2])
+        b.nodes[2] = tmp
+    end
+    return b
+end
+
+function findnextlink(edge, b)
+    for eb in edge
+        if eb.nodes[1].i == b.nodes[end].i
+            return eb
+        end
+    end
+    error("next link not found")
+end
 ###
 end

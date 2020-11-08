@@ -1,6 +1,10 @@
 $MeshFormat
 4 0 8
 $EndMeshFormat
+$PhysicalNames
+1
+2 105 "boundary"
+$EndPhysicalNames
 $Entities
 4 4 1 0
 1 0 0 0 0 0 0 0 
@@ -11,7 +15,7 @@ $Entities
 6 1 0 0 1 1 0 1 104 2 2 -3 
 7 0 1 0 1 1 0 1 101 2 3 -4 
 8 0 0 0 0 1 0 1 103 2 4 -1 
-10 0 0 0 1 1 0 1 201 4 5 6 7 8 
+10 0 0 0 1 1 0 1 105 4 5 6 7 8 
 $EndEntities
 $Nodes
 9 5

@@ -1,8 +1,4 @@
-"""
-《有限元法》P282：H-W变分原理不知道如何实现。
-暂时先用最小位能原理。
-使用对角元素乘大数法实现位移约束，避免DoF重排序。
-"""
+
 module LEFEMElem
 include("MathKits.jl")
 using .MathKits

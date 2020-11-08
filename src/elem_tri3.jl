@@ -8,8 +8,8 @@ create_elem_type_and_eval(:Tri3)
 """
 Tri3's strain matrix is a constant matrix.
 """
-function strain_matrix(elem::Tri3)
-    x = elem_x(elem)
+function strain_matrix(elem::Tri3, nodes)
+    x = elem_x(elem,nodes)
     M = ones(Float64,3,3)
     for i = 1:3
         M[i,2:3] = x[i,:]
@@ -40,8 +40,8 @@ function elem_strain(elem::Tri3)
 
 end
 
-function elem_jacobi(elem::Tri3)
-    x = elem_x(elem)
+function elem_jacobi(elem::Tri3, nodes)
+    x = elem_x(elem, nodes)
     M = ones(Float64,3,3)
     for i = 1:3
         M[i,2:3] = x[i,:]
@@ -52,10 +52,10 @@ end
 """
 t: thickness
 """
-function integ_elem_elast_brick(elem::Tri3, E, ν)
-    B = strain_matrix(elem)
+function integ_elem_elast_brick(elem::Tri3, nodes, E, ν)
+    B = strain_matrix(elem, nodes)
     D = elast_matrix_2d(E, ν, elem.ptype)
-    A = elem_area(elem)
+    A = elem_area(elem, nodes)
     Ke =  B' * D * B / A
     return Ke
 end
@@ -63,15 +63,15 @@ end
 """
 Accumulated mass matrix, transformed to a vector.
 """
-function integ_elem_mass_brick(elem::Tri3, ρ, t)
-    A = elem_area(elem)
+function integ_elem_mass_brick(elem::Tri3, nodes, ρ, t)
+    A = elem_area(elem, nodes)
     Me = ρ * A * t / 3 * ones(Float64,6)
     return Me
 end
 
-function integ_elem_brick(elem::Tri3, para)
-    Ke = integ_elem_elast_brick(elem, para["E"], para["nu"])
-    Me = integ_elem_mass_brick(elem, para["rho"], para["thickness"])
+function integ_elem_brick(elem::Tri3, nodes, para)
+    Ke = integ_elem_elast_brick(elem, nodes, para["E"], para["nu"])
+    Me = integ_elem_mass_brick(elem, nodes, para["rho"], para["thickness"])
     fe = zeros(Float64, size(Me,1))
     return Ke, Me, fe
 end

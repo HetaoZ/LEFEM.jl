@@ -93,13 +93,10 @@ end
 
 function update_elements!(s::LEStructure, d, u, a)
     dim = s.dim
-    for ie in eachindex(s.elements)
-        for k in eachindex(s.elements[ie].link)
-            nid = s.elements[ie].link[k]
-            s.elements[ie].nodes[k].d = d[(nid-1)*dim+1:nid*dim]
-            s.elements[ie].nodes[k].u = u[(nid-1)*dim+1:nid*dim]
-            s.elements[ie].nodes[k].a = a[(nid-1)*dim+1:nid*dim]
-        end
+    for nid in eachindex(s.nodes)
+        s.nodes[nid].d = d[(nid-1)*dim+1:nid*dim]
+        s.nodes[nid].u = u[(nid-1)*dim+1:nid*dim]
+        s.nodes[nid].a = a[(nid-1)*dim+1:nid*dim]        
     end
 end
 

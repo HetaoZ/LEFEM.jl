@@ -49,11 +49,10 @@ function read_mesh(elemtype, ptype, f::String)
             newe = ET[elemtype](elemtype, ptype)
             newe.id = ie
             newe.link = elemNodeTags[1:nen,ie]
-            newe.nodes = nodes[newe.link]
-            newe.dir = sign(elem_jacobi(newe))
+            newe.dir = sign(elem_jacobi(newe, nodes))
             push!(elements, newe)
         end
-        return nnp, dim, elements
+        return dim, nodes, elements
     else
         error("No element detected!")
     end

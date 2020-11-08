@@ -35,6 +35,7 @@ mutable struct LEStructure
     nnp::Int
     dim::Int
     ndof::Int
+    nodes::Vector{Node}
     elements::Vector{T} where T <: AbstractElem 
     # mesh::InterfaceMesh
     system::LESystem
@@ -43,7 +44,7 @@ mutable struct LEStructure
     cons_dof_list::Vector{Int} # constrained dofs
     cons_d_list::Vector{Real} # constrained displacements of dofs, default to be zeros.
 end
-LEStructure(nnp, dim, ndof, elements, system, para) = LEStructure(nnp, dim, ndof, elements, system, para, zeros(Float64, ndof), Int[], Int[])
+LEStructure(nnp, dim, ndof, nodes, elements, system, para) = LEStructure(nnp, dim, ndof, nodes, elements, system, para, zeros(Float64, ndof), Int[], Int[])
 export LEStructure
 # ---------------------------
 # Common Functions
@@ -81,12 +82,12 @@ export assemble!
 """
 Call assemble!() only once for linear elastic problems.
 """
-function assemble_system(ndof, elements, para, cons_dof_list, cons_d_list, dim)
+function assemble_system(ndof, nodes, elements, para, cons_dof_list, cons_d_list, dim)
     K = zeros(Float64, ndof, ndof)
     M = zeros(Float64, ndof)
     f = zeros(Float64, ndof)
     for elem in elements
-        Ke, Me, fe = integ_elem_brick(elem, para)
+        Ke, Me, fe = integ_elem_brick(elem, nodes, para)
         assemble!(K, M, f, Ke, Me, fe, elem.link, dim)
     end
     constrain_dof!(K, M, f, cons_dof_list, cons_d_list, dim)
@@ -103,10 +104,11 @@ Sometimes it returns `ERROR: gmshModelGetBoundary returned non-zero error code: 
 """
 function read_model(elemtype, ptype, meshfile, parafile)
     para = read_para(parafile)
-    nnp, dim, elements = read_mesh(elemtype, ptype, meshfile)
-    system = assemble_system(nnp*dim, elements, para, Int[], Int[], dim)
+    dim, nodes, elements = read_mesh(elemtype, ptype, meshfile)
+    nnp = length(nodes)
+    system = assemble_system(nnp*dim, nodes, elements, para, Int[], Int[], dim)
 
-    s = LEStructure(nnp, dim, nnp*dim, elements, system, para)
+    s = LEStructure(nnp, dim, nnp*dim, nodes, elements, system, para)
 
     return s
 end
@@ -164,7 +166,7 @@ function constrain_dof!(K, M, f, cons_dof_list, cons_d_list, dim)
 end
 
 function update_system!(s::LEStructure)
-    s.system = assemble_system(s.ndof, s.elements, s.para, s.cons_dof_list, s.cons_d_list, s.dim)
+    s.system = assemble_system(s.ndof, s.nodes,s.elements, s.para, s.cons_dof_list, s.cons_d_list, s.dim)
     set_disp_of_dof!(s, s.cons_dof_list, s.cons_d_list)
 end
 export update_system!
@@ -173,28 +175,17 @@ function set_disp_of_dof!(s::LEStructure, cons_dof_list, cons_d_list)
     for k in eachindex(cons_dof_list)
         cons_dof = cons_dof_list[k]
         cons_d = cons_d_list[k]
-        for i in eachindex(s.elements)
-            dof_link = link_to_dof_link(s.elements[i].link, s.dim)
-            if cons_dof in dof_link
-                dof_in_elem = findall(x->x==cons_dof, dof_link)[1]
-                node_k = cld(dof_in_elem, s.dim)
-                disp_k = dof_in_elem%s.dim
-                if disp_k == 0
-                    disp_k = s.dim
-                end
-                s.elements[i].nodes[node_k].d[disp_k] = cons_d
-            end
-        end
+        cons_node = ceil(Int, cons_dof / s.dim)
+        cons_node_k = cons_dof - (cons_node-1)*s.dim
+        s.nodes[cons_node].d[cons_node_k] = cons_d
     end
 end
 
 function assemble_elem_field(s::LEStructure, field)
-    f = getfield(s.elements[1].nodes[1], field)
+    f = getfield(s.nodes[1], field)
     d = Vector{eltype(f)}(undef, s.ndof)
-    for e in s.elements
-        for node in e.nodes 
-            d[(node.id-1)*s.dim+1:node.id*s.dim] = getfield(node, field)
-        end
+    for node in s.nodes 
+        d[(node.id-1)*s.dim+1:node.id*s.dim] = getfield(node, field)
     end
     return d
 end
@@ -211,12 +202,10 @@ function fetch_data(s::LEStructure, field)
     #         d[node.id] = Tuple(getfield(node, field))
     #     end
     # end
-    f = getfield(s.elements[1].nodes[1], field)
+    f = getfield(s.nodes[1], field)
     d = Array{eltype(f)}(undef, s.dim, s.nnp)
-    for e in s.elements
-        for node in e.nodes 
-            d[:,node.id] = getfield(node, field)
-        end
+    for node in s.nodes 
+        d[:,node.id] = getfield(node, field)
     end
     return d    
     # reshape(assemble_elem_field(s,field), (s.dim, s.nnp))
@@ -227,35 +216,35 @@ export fetch_data
 # assemble the `edge`
 # --------------------
 
-function relink(edge)
-    n = length(edge)
-    for i = 1:n
-        edge[i] = reordernodes(edge[i])
-    end
-    e = deepcopy(edge)
-    for i = 2:n
-        e[i] = findnextlink(edge, e[i-1])
-    end
-    return e
-end
+# function relink(edge)
+#     n = length(edge)
+#     for i = 1:n
+#         edge[i] = reordernodes(edge[i])
+#     end
+#     e = deepcopy(edge)
+#     for i = 2:n
+#         e[i] = findnextlink(edge, e[i-1])
+#     end
+#     return e
+# end
 
-function reordernodes(b)
-    # 规定法向量在左侧
-    if crossproduct(b.nodes[2].x-b.nodes[1].x, b.n)[1] < 0 
-        tmp = deepcopy(b.nodes[1])
-        b.nodes[1] = deepcopy(b.nodes[2])
-        b.nodes[2] = tmp
-    end
-    return b
-end
+# function reordernodes(b)
+#     # 规定法向量在左侧
+#     if crossproduct(b.nodes[2].x-b.nodes[1].x, b.n)[1] < 0 
+#         tmp = deepcopy(b.nodes[1])
+#         b.nodes[1] = deepcopy(b.nodes[2])
+#         b.nodes[2] = tmp
+#     end
+#     return b
+# end
 
-function findnextlink(edge, b)
-    for eb in edge
-        if eb.nodes[1].i == b.nodes[end].i
-            return eb
-        end
-    end
-    error("next link not found")
-end
+# function findnextlink(edge, b)
+#     for eb in edge
+#         if eb.nodes[1].i == b.nodes[end].i
+#             return eb
+#         end
+#     end
+#     error("next link not found")
+# end
 ###
 end

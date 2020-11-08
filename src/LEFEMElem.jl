@@ -35,13 +35,12 @@ function create_elem_type(name)
         mutable struct $name <: AbstractElem
             id::Int
             elemtype::String
-            nodes::Vector{Node}
-            link::Vector{Int} # link vector of nodes       
+            link::Vector{Int} # link vector of node IDs       
             ptype::String # problem type: bar, beam, pstrain, pstress, sym, 3d
             dir::Int # sign of element volume, for failure checking
         end
-        $name() = $name(-1,"none",Node[],Int[],"none",0)
-        $name(elemtype, ptype) = $name(-1,elemtype,Node[],Int[],ptype,0)
+        $name() = $name(-1,"none",Int[],"none",0)
+        $name(elemtype, ptype) = $name(-1,elemtype,Int[],ptype,0)
     end
     return code
 end
@@ -65,12 +64,12 @@ export Tri3, elem_stress, elem_strain, elem_jacobi,  check_elem, integ_elem_bric
 # Common Functions
 # ---------------------------
 
-function elem_x(elem::T) where T <: AbstractElem
-    dim = length(elem.nodes[1].x0)
-    n = length(elem.nodes)
+function elem_x(elem::T, nodes::Array{Node}) where T <: AbstractElem
+    dim = length(nodes[1].x0)
+    n = length(elem.link)
     x = Matrix{Float64}(undef,n,dim)
     for i = 1:n, j = 1:dim
-        x[i, j] = elem.nodes[i].x0[j] + elem.nodes[i].d[j]
+        x[i, j] = nodes[elem.link[i]].x0[j] + nodes[elem.link[i]].d[j]
     end
     return x
 end
@@ -78,8 +77,8 @@ end
 """
 Area of 2D elements
 """
-function elem_area(elem)
-    x = elem_x(elem)
+function elem_area(elem,nodes)
+    x = elem_x(elem,nodes)
     A = mk.polygon_area(x[:,1], x[:,2])
     return A
 end

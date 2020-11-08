@@ -14,7 +14,7 @@ function pts_cells(s::LEStructure)
     for eid = 1:length(s.elements)
         e = s.elements[eid]
         for k = 1:length(e.link)
-            node = e.nodes[k]
+            node = s.nodes[e.link[k]]
             pts[:, node.id] = node.x0
         end
         cells[eid] = MeshCell(VTK_CELL_TYPE[e.elemtype], e.link)

@@ -11,8 +11,6 @@ s = read_model("Tri3", "pstrain", "in/rect2d.msh", "in/test_mat.para")
 # constrain
 set_cons_dof!(s, [1,3,5,7], [0.2,-0.2,-0.1,0.1])
 
-# "乘大数法。但该方法用于动力学时还需考虑M和C矩阵的变化，所以这是有bug的。对M和C的元素也乘以大数即可解决。"
-
 # review the model info
 review(s)
 

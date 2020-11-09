@@ -1,14 +1,3 @@
-"""
-Explicit
-"""
-module LEFEMSolver
-include("LEFEMAssembly.jl")
-using .LEFEMAssembly
-export Tri3, LEStructure
-export read_mesh, read_para, read_model, set_cons_dof!, update_system!, lefem_advance!, review
-export fetch_data
-
-using LinearAlgebra
 
 # ---------------------------
 # Common Functions
@@ -98,8 +87,4 @@ function update_elements!(s::LEStructure, d, u, a)
         s.nodes[nid].u = u[(nid-1)*dim+1:nid*dim]
         s.nodes[nid].a = a[(nid-1)*dim+1:nid*dim]        
     end
-end
-
-
-###
 end

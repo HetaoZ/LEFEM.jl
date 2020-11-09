@@ -1,18 +1,8 @@
-module LEFEMAssembly
-using LinearAlgebra
-
-include("LEFEMElem.jl")
-using .LEFEMElem
-export Tri3, elem_stress, elem_strain, elem_jacobi
-
-include("io_pre.jl")
-export read_mesh, read_para
 
 # ---------------------------
 # Constants
 # ---------------------------
 const CONSTRAIN_ALPHA = 1.0e10
-
 
 # ---------------------------
 # Classes
@@ -24,10 +14,6 @@ mutable struct LESystem
     f::Vector{Float64} # force
 end
 
-# mutable struct InterfaceMesh
-#     edge::Array{IB}
-# end
-
 # ----------------------------
 # Unsupport mixed element types.
 # ----------------------------
@@ -37,15 +23,15 @@ mutable struct LEStructure
     ndof::Int
     nodes::Vector{Node}
     elements::Vector{T} where T <: AbstractElem 
-    # mesh::InterfaceMesh
+    boundary::Vector{Convex}
     system::LESystem
     para::Dict
     ext_f::Vector{Float64}
     cons_dof_list::Vector{Int} # constrained dofs
     cons_d_list::Vector{Real} # constrained displacements of dofs, default to be zeros.
 end
-LEStructure(nnp, dim, ndof, nodes, elements, system, para) = LEStructure(nnp, dim, ndof, nodes, elements, system, para, zeros(Float64, ndof), Int[], Int[])
-export LEStructure
+LEStructure(nnp, dim, ndof, nodes, elements, boundary, system, para) = LEStructure(nnp, dim, ndof, nodes, elements, boundary, system, para, zeros(Float64, ndof), Int[], Int[])
+
 # ---------------------------
 # Common Functions
 # ---------------------------
@@ -77,7 +63,6 @@ function assemble!(K, M, f, Ke, Me, fe, link, dim)
     assemble_M!(M, Me, link, dim)
     assemble_f!(f, fe, link, dim)
 end
-export assemble!
 
 """
 Call assemble!() only once for linear elastic problems.
@@ -104,15 +89,14 @@ Sometimes it returns `ERROR: gmshModelGetBoundary returned non-zero error code: 
 """
 function read_model(elemtype, ptype, meshfile, parafile)
     para = read_para(parafile)
-    dim, nodes, elements = read_mesh(elemtype, ptype, meshfile)
+    dim, nodes, elements, boundary = read_mesh(elemtype, ptype, meshfile)
     nnp = length(nodes)
     system = assemble_system(nnp*dim, nodes, elements, para, Int[], Int[], dim)
 
-    s = LEStructure(nnp, dim, nnp*dim, nodes, elements, system, para)
+    s = LEStructure(nnp, dim, nnp*dim, nodes, elements, boundary, system, para)
 
     return s
 end
-export read_model
 
 function review(s::LEStructure)
     println("-- short summary of model --")
@@ -131,7 +115,6 @@ function review(s::LEStructure)
     println("  number of constrained dofs : ", length(s.cons_dof_list))
     println("-- end --")
 end
-export review
 
 function set_cons_dof!(s, cons_dof_list, cons_d_list)
     @assert size(cons_dof_list) == size(cons_d_list)
@@ -144,7 +127,6 @@ function set_cons_dof!(s, cons_dof_list, cons_d_list)
     end
     update_system!(s)
 end
-export set_cons_dof!
 
 function link_to_dof_link(link, dim)
     dof_link = Vector{Int}(undef,dim*length(link))
@@ -169,7 +151,6 @@ function update_system!(s::LEStructure)
     s.system = assemble_system(s.ndof, s.nodes,s.elements, s.para, s.cons_dof_list, s.cons_d_list, s.dim)
     set_disp_of_dof!(s, s.cons_dof_list, s.cons_d_list)
 end
-export update_system!
 
 function set_disp_of_dof!(s::LEStructure, cons_dof_list, cons_d_list)
     for k in eachindex(cons_dof_list)
@@ -189,7 +170,6 @@ function assemble_elem_field(s::LEStructure, field)
     end
     return d
 end
-export assemble_elem_field
 
 """
 Fetch data from elements. This differs from assemble_elem_field.
@@ -210,7 +190,6 @@ function fetch_data(s::LEStructure, field)
     return d    
     # reshape(assemble_elem_field(s,field), (s.dim, s.nnp))
 end
-export fetch_data
 
 # --------------------
 # assemble the `edge`
@@ -246,5 +225,3 @@ export fetch_data
 #     end
 #     error("next link not found")
 # end
-###
-end

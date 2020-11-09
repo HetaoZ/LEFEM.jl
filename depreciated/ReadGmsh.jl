@@ -5,16 +5,6 @@ import .MathKits: crossproduct
 import Gmsh: gmsh
 export get_nodes, get_elems
 
-# using PyCall
-# pygmsh = pyimport("gmsh")
-# pysys = pyimport("sys")
-
-mutable struct RGConvex
-    tags::Vector{Int}
-    link::Vector{Int}
-end
-export RGConvex
-
 function get_nodes(file::String)
     gmsh.initialize()
     # gmsh.option.setNumber("General.Terminal", 1)
@@ -33,7 +23,7 @@ function get_nodes(file::String)
         append!(nodeCoords, nodeCoords_)
     end
     nodeCoords = reshape(nodeCoords, (3,Int(length(nodeCoords)/3)))
-    @info "Collected "*string(length(nodeTags))*" nodes."
+    # @info "Collected "*string(length(nodeTags))*" nodes."
     
     gmsh.finalize()
 
@@ -71,7 +61,7 @@ function get_elems(file::String, elemtype::Int)
         elemNodeTags = reshape(elemNodeTags, (Int(nt/n),n))
     end
 
-    @info "Collected "*string(n)*" elements of Type "*string(elemtype)
+    # @info "Collected "*string(n)*" elements of Type "*string(elemtype)
     
     gmsh.finalize()
 
@@ -103,14 +93,16 @@ function get_bounds(file, elemtype, dim)
                 # global elemNodeTags
                 # get the mesh elements for each elementary entity
                 bounds = gmsh.model.getBoundary((dim,e))
-                println(bounds)
+                # println(bounds)
                 
                 for bound in bounds
                     elemTypes_, elemTags_, elemNodeTags_ = gmsh.model.mesh.getElements(dim-1, bound[2])
                 
-                    println(elemTypes_)
-                    println(elemTags_)
-                    println(elemNodeTags_)
+                    # println(elemTypes_)
+                    # println(elemTags_)
+                    # println(elemNodeTags_)
+                    # println(elemTypes_[1])
+                    # println(elemtype)
     
                     if length(elemTypes_) > 0
                         if elemTypes_[1] == elemtype
@@ -129,8 +121,6 @@ function get_bounds(file, elemtype, dim)
                 nt = length(elemNodeTags)
                 elemNodeTags = reshape(elemNodeTags, (Int(nt/n),n))
             end
-            
-            
 
             # ents_dimTags = [(dim,ent) for ent in ents]
             # bs = gmsh.model.getBoundary(ents_dimTags,true)
@@ -164,8 +154,7 @@ function get_bounds(file, elemtype, dim)
             return elemTags, elemNodeTags
         end
     end
-
-    
+    error("No physical group named boundary found.")
 end
 export get_bounds
 

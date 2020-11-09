@@ -1,4 +1,3 @@
-using WriteVTK
 
 const VTK_CELL_TYPE = Dict("Tri3"=>VTKCellTypes.VTK_TRIANGLE)
 

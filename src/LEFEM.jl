@@ -1,12 +1,15 @@
 module LEFEM
-include("LEFEMSolver.jl")
-using .LEFEMSolver
-export read_mesh, read_para, LEStructure, read_model, set_cons_dof!, update_system!, review, lefem_advance!
-export fetch_data
+using LinearAlgebra, DelimitedFiles, WriteVTK, ReadGmsh, MathKits
 
+include("base.jl")
+include("elem.jl")
+include("io_pre.jl")
+include("assembly.jl")
+export read_model, review, set_cons_dof!, fetch_data
+include("solver.jl")
+export lefem_advance!
 include("io_post.jl")
 export save_to_vtk
-
 
 ###
 end

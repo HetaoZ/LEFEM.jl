@@ -27,5 +27,5 @@ function save_to_vtk(s, datanames, fields, fname)
         vtkfile[datanames[i]] = fetch_data(s, fields[i])
     end
     outfiles = vtk_save(vtkfile)
-    println("       saved to ",outfiles[1])
+    # println("       saved to ",outfiles[1])
 end

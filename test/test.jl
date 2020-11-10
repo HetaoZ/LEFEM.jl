@@ -16,15 +16,14 @@ review(s)
 
 # set solution parameters
 maxtime  = 1
-maxframe = 10
+maxframe = 1
 cutframe = 1
 
 t = 0
 frame = 0
 
-print(frame, "      ",t)
+println(frame, "      ",t)
 save_to_vtk(s, ["mydisp"], [:d], "out/disp_"*string(frame))
-println()
 
 # run the solver
 while frame <= maxframe && t <= maxtime
@@ -35,7 +34,7 @@ while frame <= maxframe && t <= maxtime
     global frame += 1
 
     if frame%cutframe == 0
-        print(frame, "      ",t)
+        println(frame, "      ",t)
         save_to_vtk(s, ["mydisp"], [:d], "out/disp_"*string(frame))
     end
 end

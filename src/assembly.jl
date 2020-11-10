@@ -113,7 +113,7 @@ function review(s::LEStructure)
 
     println("# constrains")
     println("  number of constrained dofs : ", length(s.cons_dof_list))
-    println("-- end --")
+    println()
 end
 
 function set_cons_dof!(s, cons_dof_list, cons_d_list)

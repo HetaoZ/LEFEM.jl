@@ -247,7 +247,7 @@ function get_boundary_shape!(nodes, boundary, dim)
         n = length(boundary)
         x = Matrix{Float64}(undef, n, dim)
         for k = 1:n
-            c = boundry[k]
+            c = boundary[k]
             node = nodes[c.link[1]]
             x[k, :] = node.x0 + node.d
         end

@@ -29,8 +29,9 @@ mutable struct LEStructure
     ext_f::Vector{Float64}
     cons_dof_list::Vector{Int} # constrained dofs
     cons_d_list::Vector{Real} # constrained displacements of dofs, default to be zeros.
+    movable::Bool
 end
-LEStructure(nnp, dim, ndof, nodes, elements, boundary, system, para) = LEStructure(nnp, dim, ndof, nodes, elements, boundary, system, para, zeros(Float64, ndof), Int[], Int[])
+LEStructure(nnp, dim, ndof, nodes, elements, boundary, system, para) = LEStructure(nnp, dim, ndof, nodes, elements, boundary, system, para, zeros(Float64, ndof), Int[], Int[], true)
 
 # ---------------------------
 # Common Functions
@@ -225,3 +226,59 @@ end
 #     end
 #     error("next link not found")
 # end
+
+function get_boundary_shape!(s::LEStructure)
+    if s.dim == 2
+        n = length(s.boundary)
+        x = Matrix{Float64}(undef, n, s.dim)
+        for k = 1:n
+            c = s.boundry[k]
+            node = nodes[c.link[1]]
+            x[k, :] = node.x0 + node.d
+        end
+        return x
+    else
+        error("undef")
+    end
+end
+
+function get_boundary_shape!(nodes, boundary, dim)
+    if dim == 2
+        n = length(boundary)
+        x = Matrix{Float64}(undef, n, dim)
+        for k = 1:n
+            c = boundry[k]
+            node = nodes[c.link[1]]
+            x[k, :] = node.x0 + node.d
+        end
+        return x
+    else
+        error("undef")
+    end
+end
+
+function outer_normal(c::Convex, nodes::Vector{Node}, xs::Array{Float64}, dim::Int)
+    normal = convex_normal(c, nodes, dim)
+    xc = mean(map(k->nodes[k].x0+nodes[k].d, c.link))
+    bias = 1.e-10
+    xt = xc + normal*bias
+    if pinpoly(xs, xt) == 1
+        normal *= -1
+    end
+    return normal
+end
+
+function mean(vs::Array{Array})
+    return sum(vs)/length(vs)
+end
+
+function convex_normal(c, nodes, dim)
+    if dim == 1
+        normal = [1]
+    elseif dim == 2
+        normal = rotate_matrix(pi/2) * ((nodes[c.link[2]].x0+nodes[c.link[2]].d) - ((nodes[c.link[1]].x0+nodes[c.link[1]].d)))
+    else
+        error("undef")
+    end
+    return normalize(normal)
+end

@@ -1,11 +1,11 @@
 module LEFEM
-using LinearAlgebra, DelimitedFiles, WriteVTK, ReadGmsh, MathKits
+using LinearAlgebra, DelimitedFiles, WriteVTK, ReadGmsh, MathKits, Statistics
 
 include("base.jl")
 include("elem.jl")
 include("io_pre.jl")
 include("assembly.jl")
-export read_model, review, set_cons_dof!, fetch_data
+export read_model, review, set_cons_dof!, fetch_data, LEStructure
 include("solver.jl")
 export lefem_advance!
 include("io_post.jl")

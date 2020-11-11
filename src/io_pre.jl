@@ -62,7 +62,8 @@ function read_mesh(elemtype, ptype, f::String)
     nbound = length(boundElemTags)
     boundary = Vector{Convex}(undef, nbound)
     for i in eachindex(boundary)
-        boundary[i] = Convex(boundElemTags[i], boundElemNodeTags[:,i])
+        boundary[i] = Convex(boundElemTags[i], boundElemNodeTags[:,i], Float64[])
+        boundary[i].normal = outer_normal(boundary[i], nodes, get_boundary_shape!(nodes,boundary,dim), dim)
     end
 
     return dim, nodes, elements, boundary

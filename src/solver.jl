@@ -11,6 +11,7 @@ function lefem_advance!(s::LEStructure, dt, scheme)
         error("undef")
     end
     update_elements!(s, d, u, a)
+    update_boundary!(s)
 end
 
 function explicit_solver(s::LEStructure, dt)
@@ -87,4 +88,15 @@ function update_elements!(s::LEStructure, d, u, a)
         s.nodes[nid].u = u[(nid-1)*dim+1:nid*dim]
         s.nodes[nid].a = a[(nid-1)*dim+1:nid*dim]        
     end
+end
+
+function time_step!(s)
+    return Inf
+end
+
+function update_boundary!(s::LEStructure)
+    xs = get_boundary_shape!(s)
+    for k in eachindex(s.boundary)
+        s.boundary[k].normal = outer_normal(s.boundary[k], s.nodes, xs, s.dim)
+    end 
 end

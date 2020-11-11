@@ -232,8 +232,8 @@ function get_boundary_shape!(s::LEStructure)
         n = length(s.boundary)
         x = Matrix{Float64}(undef, n, s.dim)
         for k = 1:n
-            c = s.boundry[k]
-            node = nodes[c.link[1]]
+            c = s.boundary[k]
+            node = s.nodes[c.link[1]]
             x[k, :] = node.x0 + node.d
         end
         return x
@@ -259,17 +259,14 @@ end
 
 function outer_normal(c::Convex, nodes::Vector{Node}, xs::Array{Float64}, dim::Int)
     normal = convex_normal(c, nodes, dim)
-    xc = mean(map(k->nodes[k].x0+nodes[k].d, c.link))
+    nodesx = map(k->nodes[k].x0+nodes[k].d, c.link)
+    xc = sum(nodesx)/length(nodesx)
     bias = 1.e-10
     xt = xc + normal*bias
     if pinpoly(xs, xt) == 1
         normal *= -1
     end
     return normal
-end
-
-function mean(vs::Array{Array})
-    return sum(vs)/length(vs)
 end
 
 function convex_normal(c, nodes, dim)

@@ -14,6 +14,7 @@ Gmsh = "705231aa-382f-11e9-3f0c-b7cb4346fdeb"
 DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 ReadGmsh = "f76d8135-3b6c-4282-9284-5ba13be053fc"
 MathKits = "0aefbb3a-8f27-41be-8eac-0ff28e0d4a49"
+PointInPoly = "b33f1834-3304-4c26-96eb-60ff7015163d"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"

@@ -1,5 +1,5 @@
 module LEFEM
-using LinearAlgebra, DelimitedFiles, WriteVTK, ReadGmsh, MathKits, Statistics
+using LinearAlgebra, DelimitedFiles, WriteVTK, ReadGmsh, MathKits, Statistics, PointInPoly
 
 include("base.jl")
 include("elem.jl")

@@ -88,9 +88,9 @@ end
 """
 Sometimes it returns `ERROR: gmshModelGetBoundary returned non-zero error code: 1`. But there should be no error. Just call it again.
 """
-function read_model(elemtype, ptype, meshfile, parafile)
+function read_lefem_model(elemtype, ptype, meshfile, parafile)
     para = read_para(parafile)
-    dim, nodes, elements, boundary = read_mesh(elemtype, ptype, meshfile)
+    dim, nodes, elements, boundary = read_lefem_mesh(elemtype, ptype, meshfile)
     nnp = length(nodes)
     system = assemble_system(nnp*dim, nodes, elements, para, Int[], Int[], dim)
 

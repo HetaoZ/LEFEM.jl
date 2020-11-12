@@ -16,7 +16,7 @@ An easy-to-learn package for linear elastic dynamic FEM. This package is in acti
 This is an example:
 ```julia
 # read model
-s = read_model("Tri3", "pstrain", "in/rect2d.msh", "in/test_mat.para")
+s = read_lefem_model("Tri3", "pstrain", "in/rect2d.msh", "in/test_mat.para")
 
 # constrain
 set_cons_dof!(s, [1,3,5,7], [0.2,-0.2,-0.1,0.1])

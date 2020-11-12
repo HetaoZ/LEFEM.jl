@@ -18,7 +18,7 @@ elemtype: Tri3
 
 ptype: bar, beam, pstrain, pstress, sym, 3d
 """
-function read_mesh(elemtype, ptype, f::String)
+function read_lefem_mesh(elemtype, ptype, f::String)
     dim = ELEM_DIM[elemtype]
     py_nodeTags, py_nodeCoords = get_nodes(f)
     nnp = length(py_nodeTags)

@@ -3,7 +3,7 @@
 # Common Functions
 # ---------------------------
 
-function lefem_advance!(s::LEStructure, dt, scheme)
+function advance!(s::LEStructure, dt, scheme)
     # read_lefem_mesh will automatically assemble the system.
     if scheme == "explicit"
         d, u, a = explicit_solver(s, dt)

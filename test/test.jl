@@ -6,7 +6,7 @@ catch
 end
 
 # read model
-s = read_lefem_model("Tri3", "pstrain", "in/rect2d.msh", "in/test_mat.para")
+s = read_model("Tri3", "pstrain", "in/rect2d.msh", "in/test_mat.para")
 
 # constrain
 set_cons_dof!(s, [1,3,5,7], [0.2,-0.2,-0.1,0.1])
@@ -28,7 +28,7 @@ save_to_vtk(s, ["mydisp"], [:d], "out/disp_"*string(frame))
 # run the solver
 while frame <= maxframe && t <= maxtime
     dt = 0.1
-    lefem_advance!(s, dt, "explicit")
+    advance!(s, dt, "explicit")
 
     global t += dt
     global frame += 1

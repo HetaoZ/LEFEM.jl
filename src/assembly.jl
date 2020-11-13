@@ -308,5 +308,15 @@ function convex_normal(c, nodes, dim)
     else
         error("undef")
     end
-    return normalize(normal)
+    return truncated_normalize(normal)
+end
+
+function truncated_normalize(v)
+    v = normalize(v)
+    a = map(x->x^2, v)
+    p = sortperm(v)
+    for i = 1:length(v)
+        v[p[i]] = sqrt(sum(a) - sum(a[p[[(k==i ? false : true) for k=1:length(v)]]]))
+    end
+    return v
 end

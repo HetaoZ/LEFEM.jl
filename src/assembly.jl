@@ -117,7 +117,7 @@ function review(s::LEStructure)
     println()
 end
 
-function set_cons_dof!(s, cons_dof_list, cons_d_list)
+function cons_dof!(s, cons_dof_list, cons_d_list)
     @assert size(cons_dof_list) == size(cons_d_list)
     for i = 1:length(cons_dof_list)
         dof = cons_dof_list[i]
@@ -127,6 +127,36 @@ function set_cons_dof!(s, cons_dof_list, cons_d_list)
         push!(s.cons_d_list, cons_d_list[i])
     end
     update_system!(s)
+end
+
+function cons_dof_in_box!(s, point1, point2; axis = "all", d = "zero")
+    for node in s.nodes
+        if MK.beteewneq(node.x0 + node.d, point1, point2)
+            if axis == "all"
+                # Constrain dofs in all axis.
+                dof = [s.dim*(node.id-1)+k for k=1:s.dim]
+                if d == "zero"
+                    cons_d = [0,0,0]
+                else
+                    @assert length(d) == s.dim
+                    cons_d = d
+                end
+            elseif axis in (1,2,3) 
+                dof = [s.dim*(node.id-1)+axis]
+                if d == "zero"
+                    cons_d = [0]
+                else
+                    @assert typeof(d) <: Real
+                    cons_d = [d]
+                end
+            else
+                error("undefined axis")
+            end
+            
+            append!(s.cons_dof_list, dof)
+            append!(s.cons_d_list, cons_d)
+        end
+    end
 end
 
 function link_to_dof_link(link, dim)

@@ -131,12 +131,12 @@ end
 
 function cons_dof_in_box!(s, point1, point2; axis = "all", d = "zero")
     for node in s.nodes
-        if MK.beteewneq(node.x0 + node.d, point1, point2)
+        if MathKits.betweeneq(node.x0 + node.d, point1, point2)
             if axis == "all"
                 # Constrain dofs in all axis.
                 dof = [s.dim*(node.id-1)+k for k=1:s.dim]
                 if d == "zero"
-                    cons_d = [0,0,0]
+                    cons_d = [0 for k=1:s.dim]
                 else
                     @assert length(d) == s.dim
                     cons_d = d
@@ -157,6 +157,7 @@ function cons_dof_in_box!(s, point1, point2; axis = "all", d = "zero")
             append!(s.cons_d_list, cons_d)
         end
     end
+    update_system!(s)
 end
 
 function link_to_dof_link(link, dim)

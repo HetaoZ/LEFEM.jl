@@ -89,14 +89,25 @@ end
 Sometimes it returns `ERROR: gmshModelGetBoundary returned non-zero error code: 1`. But there should be no error. Just call it again.
 """
 function read_model(elemtype, ptype, meshfile, parafile)
-    para = read_para(parafile)
-    dim, nodes, elements, boundary = read_lefem_mesh(elemtype, ptype, meshfile)
-    nnp = length(nodes)
-    system = assemble_system(nnp*dim, nodes, elements, para, Int[], Int[], dim)
-
-    s = LEStructure(nnp, dim, nnp*dim, nodes, elements, boundary, system, para)
-
-    return s
+    try
+        para = read_para(parafile)
+        dim, nodes, elements, boundary = read_lefem_mesh(elemtype, ptype, meshfile)
+        nnp = length(nodes)
+        system = assemble_system(nnp*dim, nodes, elements, para, Int[], Int[], dim)
+    
+        s = LEStructure(nnp, dim, nnp*dim, nodes, elements, boundary, system, para)
+    
+        return s
+    catch
+        para = read_para(parafile)
+        dim, nodes, elements, boundary = read_lefem_mesh(elemtype, ptype, meshfile)
+        nnp = length(nodes)
+        system = assemble_system(nnp*dim, nodes, elements, para, Int[], Int[], dim)
+    
+        s = LEStructure(nnp, dim, nnp*dim, nodes, elements, boundary, system, para)
+    
+        return s
+    end        
 end
 
 function review(s::LEStructure)
@@ -158,6 +169,15 @@ function cons_dof_in_box!(s, point1, point2; axis = "all", d = "zero")
         end
     end
     update_system!(s)
+end
+
+function cons_force_in_box!(s, point1, point2, force)
+    @assert length(force) == s.dim
+    for node in s.nodes
+        if MathKits.betweeneq(node.x0 + node.d, point1, point2)
+            s.ext_f[s.dim*(node.id-1)+1:s.dim*node.id] = force
+        end
+    end
 end
 
 function link_to_dof_link(link, dim)

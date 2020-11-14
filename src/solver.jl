@@ -37,44 +37,6 @@ function explicit_solver(s::LEStructure, dt)
     end
     f_eff = f .- (s.system.K .- c2 .* M) * d_bk .- tmp * dminus
     d = M_eff\f_eff
-
-    # stress = s.system.K * d_bk
-    # f_eff = dt^2 * (f - stress)
-    # d = f_eff ./ s.system.M + 2.0*d_bk - dminus    
-
-    
-    # println("stress = ")
-    # display(stress)
-    # println()
-    # println("f = ")
-    # display(f)
-    # println()
-    # println("f_eff = ")
-    # display(f_eff)
-    # println()
-    # println("d = ")
-    # display(d)
-    # println()
-    # println("dminus = ")
-    # display(dminus)
-    # println()
-    # println("d_bk = ")
-    # display(d_bk)
-    # println()
-    # println("K = ")
-    # display(s.system.K)
-    # println()
-
-    # println("(s.system.K .- c2 .* M)  = ")
-    # display((s.system.K .- c2 .* M))
-    # println()
-    # println("tmp * dminus = ")
-    # display(tmp * dminus)
-    # println()
-    # println("(s.system.K .- c2 .* M) * d_bk .- tmp * dminus = ")
-    # display((s.system.K .- c2 .* M) * d_bk .- tmp * dminus)
-    # println()
-
         
     u = (d - dminus) * c1
     a = (dminus - 2*d_bk + d) * c0

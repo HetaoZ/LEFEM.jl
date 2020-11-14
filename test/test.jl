@@ -17,7 +17,7 @@ review(s)
 
 # set solution parameters
 maxtime  = 1
-maxframe = 1000000
+maxframe = 1000
 N = 1000000
 
 t = 0
@@ -28,13 +28,13 @@ save_to_vtk(s, ["mydisp"], [:d], "out/disp_"*string(N+frame))
 
 # run the solver
 while frame <= maxframe && t <= maxtime
-    dt = time_step!(s)
-    advance!(s, dt, "explicit")
+    dt = 1e-6
+    advance!(s, dt, "newmark")
 
     global t += dt
     global frame += 1
 
-    if frame%20000 == 0
+    if frame%20 == 0
         println(frame, "      ",t)
         save_to_vtk(s, ["mydisp"], [:d], "out/disp_"*string(N+frame))
 

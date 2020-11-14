@@ -7,9 +7,9 @@
 # ---------------------
 const ET_NUMBER = Dict("Seg2"=>1, "Tri3"=>2, "Quad4"=>3)
 const BOUND_ET_NUMBER = Dict("Seg2"=>0, "Tri3"=>1, "Quad4"=>1) # boundary element type of a specific element type
-const ET = Dict("Tri3"=>Tri3)
+const ET = Dict("Tri3"=>Tri3, "Quad4"=>Quad4)
 const ELEM_NEN = Dict(1=>2, 2=>3, 3=>4, 4=>4, 5=>8)
-const ELEM_DIM = Dict("Tri3"=>2)
+const ELEM_DIM = Dict("Tri3"=>2, "Quad4"=>2)
 
 """
 Supported formats: .msh

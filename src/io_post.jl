@@ -1,5 +1,5 @@
 
-const VTK_CELL_TYPE = Dict("Tri3"=>VTKCellTypes.VTK_TRIANGLE)
+const VTK_CELL_TYPE = Dict("Tri3"=>VTKCellTypes.VTK_TRIANGLE, "Quad4"=>VTKCellTypes.VTK_QUAD)
 
 function create_vtkfile(s::LEStructure, fname)
     points, cells = pts_cells(s)

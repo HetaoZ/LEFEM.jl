@@ -35,8 +35,8 @@ include("material.jl")
 # ---------------------------
 # Element definitions
 # ---------------------------
-include("elem_tri3.jl")
-
+include("elemtypes/tri3.jl")
+include("elemtypes/quad4.jl")
 # ---------------------------
 # Common Functions
 # ---------------------------

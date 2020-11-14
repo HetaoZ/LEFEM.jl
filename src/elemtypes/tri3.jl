@@ -59,7 +59,7 @@ function elem_jacobi(elem::Tri3, nodes)
 end
 
 """
-t: thickness
+t: thickness = 1
 """
 function integ_elem_elast_brick(elem::Tri3, nodes, E, ν)
     B = strain_matrix(elem, nodes)

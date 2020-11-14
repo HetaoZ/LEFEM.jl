@@ -37,10 +37,5 @@ while frame <= maxframe && t <= maxtime
     if frame%20 == 0
         println(frame, "      ",t)
         save_to_vtk(s, ["mydisp"], [:d], "out/disp_"*string(N+frame))
-
-        display(fetch_data(s,:d)); println()
-        display(fetch_data(s,:u)); println()
-        display(fetch_data(s,:a)); println()
-        println("-----------------")
     end
 end

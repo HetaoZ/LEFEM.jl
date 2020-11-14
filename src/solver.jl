@@ -7,6 +7,8 @@ function advance!(s::LEStructure, dt, scheme)
     # read_lefem_mesh will automatically assemble the system.
     if scheme == "explicit"
         d, u, a = explicit_solver(s, dt)
+    elseif scheme == "newmark-beta"
+        d, u, a = newmark_beta_solver!(s, dt)
     else
         error("undef")
     end
@@ -41,6 +43,35 @@ function explicit_solver(s::LEStructure, dt)
     u = (d - dminus) * c1
     a = (dminus - 2*d_bk + d) * c0
     return d, u, a
+end
+
+function newmark_beta_solver!(s::LEStructure, dt)
+    d = assemble_elem_field(s, :d)
+    u = assemble_elem_field(s, :u)
+    a = assemble_elem_field(s, :a)
+    f = s.system.f .+ s.ext_f
+    d_bk = copy(d)
+
+    c0 = 1.0/(dt*dt)
+    c1 = 0.5/dt
+    c2 = 2.0*c0
+    c3 = 1.0/c2
+    dminus = d - dt*u + c3*a
+
+    M = diagm(s.system.M)
+
+    M_eff = c0 .* M
+    tmp = c0 .* M
+    if s.para["damping"]
+        M_eff .+= (c1 .* s.system.C)
+        tmp .-= c1 .* C
+    end
+    f_eff = f .- (s.system.K .- c2 .* M) * d_bk .- tmp * dminus
+    d = M_eff\f_eff
+        
+    u = (d - dminus) * c1
+    a = (dminus - 2*d_bk + d) * c0
+    return d, u, a    
 end
 
 function update_elements!(s::LEStructure, d, u, a)

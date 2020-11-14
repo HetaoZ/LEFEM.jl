@@ -10,28 +10,12 @@ Tri3's strain matrix is a constant matrix.
 """
 function strain_matrix(elem::Tri3, nodes)
     x = elem_x(elem,nodes)
-    M = ones(Float64,3,3)
-    for i = 1:3
-        M[i,2:3] = x[i,:]
-    end
-    D = det(M)
-    # B = zeros(Float64,3,6)
-    # for k = 1:3
-    #     p = Bool[true,true,true]
-    #     p[k] = false
-    #     MP = M[p,:]
-    #     b = -det(MP[:,[1,3]])
-    #     c = det(MP[:,[1,2]])
-    #     Bk = zeros(Float64,3,2)
-    #     Bk[1,1] = b
-    #     Bk[2,2] = c
-    #     Bk[3,1] = c
-    #     Bk[3,2] = b
-    #     B[:, 2*k-1:2*k] = Bk
-    # end
     x1 = x[1,1]; y1 = x[1,2]
     x2 = x[2,1]; y2 = x[2,2]
     x3 = x[3,1]; y3 = x[3,2]
+    D = det([1.0  x1  y1;
+    1.0  x2  y2;
+    1.0  x3  y3])
     b1 = y2-y3; c1 = -x2+x3
     b2 = y3-y1; c2 = -x3+x1
     b3 = y1-y2; c3 = -x1+x2

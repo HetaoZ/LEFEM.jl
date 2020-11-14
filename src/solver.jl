@@ -52,13 +52,27 @@ function update_elements!(s::LEStructure, d, u, a)
     end
 end
 
-function time_step!(s)
-    return Inf
-end
-
 function update_boundary!(s::LEStructure)
     xs = get_boundary_shape!(s)
     for k in eachindex(s.boundary)
         s.boundary[k].normal = outer_normal(s.boundary[k], s.nodes, xs, s.dim)
     end 
+end
+
+function time_step!(s::LEStructure)
+    minL = 1.0
+    minrho = 1.0
+    for e in s.elements
+        x = elem_x(e, s.nodes)
+        extlink = [e.link; e.link[1]]
+        for i = 1:length(e.link)
+            L = norm((s.nodes[extlink[i]].x0+s.nodes[extlink[i]].d) - (s.nodes[extlink[i+1]].x0+s.nodes[extlink[i+1]].d))
+            minL = min(minL, L)
+        end
+        minrho = min(minrho, elem_density(e, s.nodes, s.para["rho"]))
+    end
+
+    C = sqrt(s.para["E"]/minrho)
+    dt = pi * minL / C
+    return dt
 end

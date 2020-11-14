@@ -28,7 +28,7 @@ save_to_vtk(s, ["mydisp"], [:d], "out/disp_"*string(N+frame))
 
 # run the solver
 while frame <= maxframe && t <= maxtime
-    dt = 1e-6
+    dt = time_step!(s)
     advance!(s, dt, "explicit")
 
     global t += dt

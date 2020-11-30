@@ -111,7 +111,7 @@ function read_model(elemtype, ptype, meshfile, parafile)
 end
 
 function review(s::LEStructure)
-    println("-- short summary of model --")
+    println("-- short summary of LEStructure --")
     println("# parameters")
     for k in keys(s.para)
         println("  ",k," : ",s.para[k])

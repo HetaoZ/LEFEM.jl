@@ -5,35 +5,6 @@
 const CONSTRAIN_ALPHA = 1.0e10
 
 # ---------------------------
-# Classes
-# ---------------------------
-mutable struct LESystem
-    K::Matrix{Float64} # stiffness
-    M::Vector{Float64} # mass
-    C::Matrix{Float64} # damping
-    f::Vector{Float64} # force
-end
-
-# ----------------------------
-# Unsupport mixed element types.
-# ----------------------------
-mutable struct LEStructure
-    nnp::Int
-    dim::Int
-    ndof::Int
-    nodes::Vector{Node}
-    elements::Vector{T} where T <: AbstractElem 
-    boundary::Vector{Convex}
-    system::LESystem
-    para::Dict
-    ext_f::Vector{Float64}
-    cons_dof_list::Vector{Int} # constrained dofs
-    cons_d_list::Vector{Real} # constrained displacements of dofs, default to be zeros.
-    movable::Bool
-end
-LEStructure(nnp, dim, ndof, nodes, elements, boundary, system, para) = LEStructure(nnp, dim, ndof, nodes, elements, boundary, system, para, zeros(Float64, ndof), Int[], Int[], true)
-
-# ---------------------------
 # Common Functions
 # ---------------------------
 function assemble_K!(K, Ke, link, dim)

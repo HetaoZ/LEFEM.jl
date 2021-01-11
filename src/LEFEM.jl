@@ -10,6 +10,7 @@ const NGP = 2
 
 include("base.jl")
 include("elem.jl")
+include("copy.jl")
 include("io_pre.jl")
 include("assembly.jl")
 export read_model, review, cons_dof!, cons_dof_in_box!, cons_force_in_box!, fetch_data, LEStructure

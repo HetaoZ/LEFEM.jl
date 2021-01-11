@@ -3,29 +3,6 @@
 # Constants
 # ---------------------------
 
-# ---------------------------
-# Classes
-# ---------------------------
-
-abstract type AbstractElem end
-
-function create_elem_type(name)
-    code = quote
-        mutable struct $name <: AbstractElem
-            id::Int
-            elemtype::String
-            link::Vector{Int} # link vector of node IDs       
-            ptype::String # problem type: bar, beam, pstrain, pstress, sym, 3d
-            dir::Int # sign of element volume, for failure checking
-        end
-        $name() = $name(-1,"none",Int[],"none",0)
-        $name(elemtype, ptype) = $name(-1,elemtype,Int[],ptype,0)
-    end
-    return code
-end
-
-create_elem_type_and_eval(name) = eval(create_elem_type(name))
-
 
 # ---------------------------
 # Material definitions

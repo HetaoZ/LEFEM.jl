@@ -5,7 +5,7 @@
 [![Build Status](https://github.com/HetaoZ/LEFEM.jl/workflows/CI/badge.svg)](https://github.com/HetaoZ/LEFEM.jl/actions)
 [![Coverage](https://codecov.io/gh/HetaoZ/LEFEM.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/HetaoZ/LEFEM.jl)
 
-An easy-to-learn package for linear elastic dynamic FEM. This package is in active development. 
+An easy-to-learn package for linear elastic dynamic FEM.
 
 # Install
 ```julia

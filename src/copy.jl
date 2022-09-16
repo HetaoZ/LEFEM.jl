@@ -17,7 +17,7 @@ function copy_nodes!(nodes::Vector{Node})
     return deepcopy.(nodes)
 end
 
-function copy_elements!(elements::Vector{T} where T <: AbstractElem )
+function copy_elements!(elements::Vector{T} where T <: AbstractElementType )
     return deepcopy.(elements)
 end
 

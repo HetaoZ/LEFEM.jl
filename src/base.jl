@@ -18,11 +18,13 @@ Convex() = Convex(0,Int[], Float64[])
 # Classes
 # ---------------------------
 
-abstract type AbstractElem end
+abstract type AbstractElementType end
+
+
 
 function create_elem_type(name)
     code = quote
-        mutable struct $name <: AbstractElem
+        mutable struct $name <: AbstractElementType
             id::Int
             elemtype::String
             link::Vector{Int} # link vector of node IDs       
@@ -55,7 +57,7 @@ mutable struct LEStructure
     dim::Int
     ndof::Int
     nodes::Vector{Node}
-    elements::Vector{T} where T <: AbstractElem 
+    elements::Vector{T} where T <: AbstractElementType 
     boundary::Vector{Convex}
     system::LESystem
     para::Dict
@@ -65,4 +67,3 @@ mutable struct LEStructure
     movable::Bool
 end
 LEStructure(nnp, dim, ndof, nodes, elements, boundary, system, para) = LEStructure(nnp, dim, ndof, nodes, elements, boundary, system, para, zeros(Float64, ndof), Int[], Int[], true)
-

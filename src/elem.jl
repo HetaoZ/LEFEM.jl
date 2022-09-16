@@ -7,18 +7,20 @@
 # ---------------------------
 # Material definitions
 # ---------------------------
-include("material.jl")
+include("grid/material/linear_elasticity.jl")
 
 # ---------------------------
 # Element definitions
 # ---------------------------
-include("elemtypes/tri3.jl")
-include("elemtypes/quad4.jl")
+include("grid/elemtypes/tri3.jl")
+include("grid/elemtypes/quad4.jl")
+# include("elemtypes/tet4.jl")
+# include("elemtypes/hex8.jl")
 # ---------------------------
 # Common Functions
 # ---------------------------
 
-function elem_x(elem::T, nodes::Array{Node}) where T <: AbstractElem
+function elem_x(elem::T, nodes::Array{Node}) where T <: AbstractElementType
     dim = length(nodes[1].x0)
     n = length(elem.link)
     x = Matrix{Float64}(undef,n,dim)
@@ -35,6 +37,19 @@ function elem_area(elem, nodes)
     x = elem_x(elem,nodes)
     A = polygon_area(x[:,1], x[:,2])
     return A
+end
+
+
+function polygon_area(x, y)
+    n = length(x)
+    if n < 3 
+        return 0.
+    end
+    s = x[n]*(y[1] - y[n-1]) + x[1]*(y[2] - y[n])
+    for i = 2:n-1
+        s += x[i]*(y[i+1] - y[i-1])
+    end
+    return s * 0.5
 end
 
 function elem_density(elem, nodes, rho0)

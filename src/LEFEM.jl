@@ -1,5 +1,5 @@
 module LEFEM
-using LinearAlgebra, DelimitedFiles, WriteVTK, ReadGmsh, MathKits, Statistics, PointInPoly
+using LinearAlgebra, DelimitedFiles, WriteVTK, ReadGmsh, Statistics, PointInPoly
 
 const GAUSS_POINT = Dict(
                          1 => (0.5, 1.0),
@@ -11,7 +11,7 @@ const NGP = 2
 include("base.jl")
 include("elem.jl")
 include("copy.jl")
-include("io_pre.jl")
+include("grid/generator/io_pre.jl")
 include("assembly.jl")
 export read_model, review, cons_dof!, cons_dof_in_box!, cons_force_in_box!, fetch_data, LEStructure
 include("solver.jl")

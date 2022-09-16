@@ -9,8 +9,8 @@ const CONSTRAIN_ALPHA = 1.0e10
 # ---------------------------
 function assemble_K!(K, Ke, link, dim)
     dof_link = link_to_dof_link(link, dim)
-    for i = 1:length(dof_link)  
-        for j = 1:length(dof_link)
+    for i = eachindex(dof_link)  
+        for j = eachindex(dof_link)
             K[dof_link[i], dof_link[j]] += Ke[i,j]
         end
     end 
@@ -18,14 +18,14 @@ end
 
 function assemble_M!(M, Me, link, dim)
     dof_link = link_to_dof_link(link, dim)
-    for i = 1:length(dof_link)  
+    for i = eachindex(dof_link)  
         M[dof_link[i]] += Me[i]
     end     
 end
 
 function assemble_f!(f, fe, link, dim)
     dof_link = link_to_dof_link(link, dim)
-    for i = 1:length(dof_link)  
+    for i = eachindex(dof_link)  
         f[dof_link[i]] += fe[i]
     end 
 end
@@ -101,7 +101,7 @@ end
 
 function cons_dof!(s, cons_dof_list, cons_d_list)
     @assert size(cons_dof_list) == size(cons_d_list)
-    for i = 1:length(cons_dof_list)
+    for i = eachindex(cons_dof_list)
         dof = cons_dof_list[i]
         @assert dof >= 1
         @assert dof <= s.ndof
@@ -111,9 +111,13 @@ function cons_dof!(s, cons_dof_list, cons_d_list)
     update_system!(s)
 end
 
+@inline function betweeneq(a::Vector{T}, lo::Vector{T}, hi::Vector{T}) where T <: Real
+    return all(lo .≤ a .≤ hi)
+end
+
 function cons_dof_in_box!(s, point1, point2; axis = "all", d = "zero")
     for node in s.nodes
-        if MathKits.betweeneq(node.x0 + node.d, point1, point2)
+        if betweeneq(node.x0 + node.d, point1, point2)
             if axis == "all"
                 # Constrain dofs in all axis.
                 dof = [s.dim*(node.id-1)+k for k=1:s.dim]
@@ -145,7 +149,7 @@ end
 function cons_force_in_box!(s, point1, point2, force)
     @assert length(force) == s.dim
     for node in s.nodes
-        if MathKits.betweeneq(node.x0 + node.d, point1, point2)
+        if betweeneq(node.x0 + node.d, point1, point2)
             s.ext_f[s.dim*(node.id-1)+1:s.dim*node.id] = force
         end
     end
@@ -153,7 +157,7 @@ end
 
 function link_to_dof_link(link, dim)
     dof_link = Vector{Int}(undef,dim*length(link))
-    for i = 1:length(link)
+    for i = eachindex(link)
         for j = 1:dim
             dof_link[(i-1)*dim+j] = (link[i]-1)*dim+j
         end
@@ -162,7 +166,7 @@ function link_to_dof_link(link, dim)
 end
 
 function constrain_dof!(K, M, f, cons_dof_list, cons_d_list, dim)
-    for k = 1:length(cons_dof_list)
+    for k = eachindex(cons_dof_list)
         i = cons_dof_list[k]
         K[i,i] *= CONSTRAIN_ALPHA
         M[i] *= CONSTRAIN_ALPHA
@@ -279,16 +283,24 @@ function get_boundary_shape!(nodes, boundary, dim)
     end
 end
 
+function link_to_faces(c::Convex)
+    return ntuple(i->(c.link[i], c.link[i+1]), length(c.link)-1)
+end
+
 function outer_normal(c::Convex, nodes::Vector{Node}, xs::Array{Float64}, dim::Int)
     normal = convex_normal(c, nodes, dim)
     nodesx = map(k->nodes[k].x0+nodes[k].d, c.link)
     xc = sum(nodesx)/length(nodesx)
     bias = 1.e-10
     xt = xc + normal*bias
-    if pinpoly(xs, xt) == 1
+    if PointInPoly.pinpoly(ntuple(i->Tuple(xs[:,i]),size(xs,2))..., link_to_faces(c), Tuple(xt)) == 1
         normal *= -1
     end
     return normal
+end
+
+function rotate_matrix(angle::Real)
+    return [cos(angle) -sin(angle); sin(angle) cos(angle)]
 end
 
 function convex_normal(c, nodes, dim)
@@ -306,8 +318,8 @@ function truncated_normalize(v)
     v = normalize(v)
     a = map(x->x^2, v)
     p = sortperm(v)
-    for i = 1:length(v)
-        v[p[i]] = sqrt(sum(a) - sum(a[p[[(k==i ? false : true) for k=1:length(v)]]]))
+    for i = eachindex(v)
+        v[p[i]] = sqrt(sum(a) - sum(a[p[[(k==i ? false : true) for k=eachindex(v)]]]))
     end
     return v
 end

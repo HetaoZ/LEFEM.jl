@@ -3,12 +3,12 @@
 # and integration methods.
 # -----------------------------------------------
 
-create_elem_type_and_eval(:Quad4)
+create_elem_type_and_eval(:Tet4)
 
 """
-Quad4's strain matrix is a constant matrix.
+Tet4's strain matrix is a constant matrix.
 """
-function strain_matrix(elem::Quad4, nodes, r, s)
+function strain_matrix(elem::Tet4, nodes, r, s)
     x = elem_x(elem, nodes)
     x1 = x[1,1]; y1 = x[1,2]
     x2 = x[2,1]; y2 = x[2,2]
@@ -43,15 +43,15 @@ function strain_matrix(elem::Quad4, nodes, r, s)
     return B ./ detJ, detJ
 end
 
-function elem_stress(elem::Quad4)
+function elem_stress(elem::Tet4)
 
 end
 
-function elem_strain(elem::Quad4)
+function elem_strain(elem::Tet4)
 
 end
 
-function elem_jacobi(elem::Quad4, nodes)
+function elem_jacobi(elem::Tet4, nodes)
     x = elem_x(elem, nodes)
     x1 = x[1,1]; y1 = x[1,2]
     x2 = x[2,1]; y2 = x[2,2]
@@ -74,7 +74,7 @@ end
 """
 t: thickness = 1
 """
-function integ_elem_elast_brick(elem::Quad4, nodes, E, ν)
+function integ_elem_elast_brick(elem::Tet4, nodes, E, ν)
     gp, gpw = GAUSS_POINT[NGP]
     D = elast_matrix_2d(E, ν, elem.ptype)
     Ke = zeros(Float64,8,8)
@@ -88,13 +88,13 @@ end
 """
 Accumulated mass matrix, transformed to a vector.
 """
-function integ_elem_mass_brick(elem::Quad4, nodes, ρ, t)
+function integ_elem_mass_brick(elem::Tet4, nodes, ρ, t)
     A = elem_area(elem, nodes)
     Me = ρ * A * t / 4 * ones(Float64,8)
     return Me
 end
 
-function integ_elem_brick(elem::Quad4, nodes, para)
+function integ_elem_brick(elem::Tet4, nodes, para)
     Ke = integ_elem_elast_brick(elem, nodes, para["E"], para["nu"])
     Me = integ_elem_mass_brick(elem, nodes, para["rho"], para["thickness"])
     fe = zeros(Float64, size(Me,1))

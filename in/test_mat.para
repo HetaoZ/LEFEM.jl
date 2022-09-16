@@ -1,6 +1,6 @@
-"E"	1
-"nu"	0.3
-"rho"	1
+"E"	100.0e6
+"nu"	0.1
+"rho"	10.0
 "thickness"	1
 "damping"	false
 "damping coeff alpha"	0
